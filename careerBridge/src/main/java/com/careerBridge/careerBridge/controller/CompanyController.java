@@ -1,7 +1,10 @@
 package com.careerBridge.careerBridge.controller;
 
 import com.careerBridge.careerBridge.entity.Company;
+import com.careerBridge.careerBridge.entity.Student;
 import com.careerBridge.careerBridge.service.CompanyService;
+import com.careerBridge.careerBridge.dto.CompanyRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -13,8 +16,16 @@ public class CompanyController {
     private CompanyService companyService;
 
     @PostMapping
-    public Company addCompany(@RequestBody Company company){
-        return companyService.saveCompany(company);
+    public Company addCompany(@Valid @RequestBody CompanyRequest request){
+        Company company= new Company(
+                request.getCompanyName(),
+                request.getEmail(),
+                request.getPhoneNumber(),
+                request.getLocation(),
+                request.getIndustry(),
+                request.getWebsite()
+        );
+        return companyService.saveCompany(request);
     }
 
     @GetMapping

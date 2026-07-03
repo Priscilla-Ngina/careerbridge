@@ -1,6 +1,10 @@
 package com.careerBridge.careerBridge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -23,6 +27,15 @@ public class Student {
 
     private String phoneNumber;
 
+    private LocalDateTime createdAt;
+
+    @OneToOne
+    @JoinColumn(name="User_id")
+    private User user;
+
+    @OneToMany(mappedBy = "student")
+    private List<Application> applications;
+
     public Student(){}
 
     public Student(String name, String email, String admissionNumber, String course, int yearOfStudy, String phoneNumber) {
@@ -36,6 +49,18 @@ public class Student {
 
     public long getId(){
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getName(){
@@ -84,6 +109,14 @@ public class Student {
 
     public void setPhoneNumber(String phoneNumber){
     this.phoneNumber=phoneNumber;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt=createdAt;
     }
 
 }

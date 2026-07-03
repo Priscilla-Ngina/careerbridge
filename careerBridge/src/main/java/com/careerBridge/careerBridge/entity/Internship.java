@@ -1,7 +1,10 @@
 package com.careerBridge.careerBridge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name="internship")
@@ -13,6 +16,7 @@ public class Internship {
     private String title;
 
     @Column(length=1000)
+    private LocalDateTime createdAt;
     private String description;
     private String requirements;
     private String location;
@@ -24,9 +28,14 @@ public class Internship {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "internship")
+    private List<Application> applications;
+
     public Internship(){}
 
-    public Internship(String title, String description, String requirements, String location, String companyName, String type, int durationInMonths, double stipend, LocalDate applicationDeadline, LocalDate startDate, LocalDate endDate) {
+    public Internship(LocalDateTime createdAt, String title, String description, String requirements, String location, String companyName, String type, int durationInMonths, double stipend, LocalDate applicationDeadline, LocalDate startDate, LocalDate endDate) {
+        this.createdAt = createdAt;
         this.title = title;
         this.description = description;
         this.requirements = requirements;
@@ -42,6 +51,18 @@ public class Internship {
 
     public Long getId(){
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt = createdAt;
     }
 
     public String getTitle(){

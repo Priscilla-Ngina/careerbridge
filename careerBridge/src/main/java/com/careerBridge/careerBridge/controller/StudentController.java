@@ -2,6 +2,10 @@ package com.careerBridge.careerBridge.controller;
 
 import com.careerBridge.careerBridge.entity.Student;
 import com.careerBridge.careerBridge.service.StudentService;
+import com.careerBridge.careerBridge.dto.StudentRequest;
+import com.careerBridge.careerBridge.entity.User;
+import com.careerBridge.careerBridge.dto.RegistrationRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -16,8 +20,19 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student addStudent(@RequestBody Student student){
-        return studentService.saveStudent(student);
+    public Student addStudent(@Valid @RequestBody StudentRequest request){
+
+        Student student= new Student(
+        request.getName(),
+        request.getEmail(),
+        request.getAdmissionNumber(),
+        request.getCourse(),
+        request.getYearOfStudy(),
+        request.getPhoneNumber()
+        );
+
+
+        return studentService.saveStudent(request);
     }
 
     @GetMapping

@@ -1,6 +1,7 @@
 package com.careerBridge.careerBridge.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="company")
@@ -14,6 +15,12 @@ public class Company {
     private String location;
     private String industry;
     private String website;
+    private LocalDateTime createdAt;
+
+    @OneToOne
+    @JoinColumn(name="User_id")
+    private User user;
+
 
     public Company(){}
 
@@ -24,9 +31,18 @@ public class Company {
         this.location=location;
         this.industry=industry;
         this.website=website;
+        this.createdAt = LocalDateTime.now();
     }
     public Long getId(){
         return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getCompanyName(){
@@ -75,5 +91,13 @@ public class Company {
 
     public void setWebsite(String website){
         this.website=website;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt=createdAt;
     }
 }

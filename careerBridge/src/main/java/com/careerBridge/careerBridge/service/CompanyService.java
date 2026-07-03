@@ -1,17 +1,53 @@
 package com.careerBridge.careerBridge.service;
 
 import com.careerBridge.careerBridge.entity.Company;
+import com.careerBridge.careerBridge.entity.Student;
+import com.careerBridge.careerBridge.entity.User;
 import com.careerBridge.careerBridge.repository.CompanyRepository;
+import com.careerBridge.careerBridge.dto.CompanyRequest;
+import com.careerBridge.careerBridge.exception.ResourceNotFoundException;
+import com.careerBridge.careerBridge.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class CompanyService {
     @Autowired
     private CompanyRepository companyRepository;
+    private UserRepository userRepository;
 
-public Company saveCompany(Company company){
+    public CompanyService(CompanyRepository companyRepository, UserRepository userRepository){
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
+    }
+
+public Company saveCompany(CompanyRequest request){
+
+    User user = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    if(!user.getRole().equalsIgnoreCase("COMPANY")){
+        throw new IllegalArgumentException("Only COMPANY users can create company profiles");
+    }
+
+    if(companyRepository.existsByUserId(user.getId())){
+        throw new IllegalArgumentException("This user already has a company profile");
+    }
+
+    Company company = new Company();
+
+    company.setUser(user);
+    company.setCompanyName(request.getCompanyName());
+    company.setEmail(request.getEmail());
+    company.setPhoneNumber(request.getPhoneNumber());
+    company.setLocation(request.getLocation());
+    company.setIndustry(request.getIndustry());
+    company.setWebsite(request.getWebsite());
+    company.setCreatedAt(LocalDateTime.now());
+
+
     return companyRepository.save(company);
 }
 
@@ -20,7 +56,8 @@ public List<Company> getAllCompanies(){
 }
 
 public Company getCompanyById(Long id){
-    return companyRepository.findById(id).orElse(null);
+    return companyRepository.findById(id).orElseThrow(()->
+            new ResourceNotFoundException("Company Not Found"));
 
 }
 
@@ -38,6 +75,8 @@ Company existing= getCompanyById(id);
 }
 
 public void deleteCompany(Long id){
+    Company company=companyRepository.findById(id).orElseThrow(()->
+            new ResourceNotFoundException("Company Not Found"));
     companyRepository.deleteById(id);
 }
 }
