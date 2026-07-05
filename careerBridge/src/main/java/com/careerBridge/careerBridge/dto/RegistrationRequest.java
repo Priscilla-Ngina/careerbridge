@@ -1,6 +1,6 @@
 package com.careerBridge.careerBridge.dto;
 
-
+import com.careerBridge.careerBridge.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,8 +14,8 @@ public class RegistrationRequest {
     @NotBlank(message="Password is required")
     private String password;
 
-    @NotBlank(message="Role is required")
-    private String role;
+    @NotNull(message="Role is required")
+    private Role role;
 
 
 
@@ -35,11 +35,11 @@ public class RegistrationRequest {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

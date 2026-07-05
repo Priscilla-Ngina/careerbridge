@@ -2,6 +2,7 @@ package com.careerBridge.careerBridge.service;
 
 import com.careerBridge.careerBridge.entity.Student;
 import com.careerBridge.careerBridge.entity.User;
+import com.careerBridge.careerBridge.entity.Role;
 import com.careerBridge.careerBridge.repository.StudentRepository;
 import com.careerBridge.careerBridge.repository.UserRepository;
 import com.careerBridge.careerBridge.dto.StudentRequest;
@@ -27,7 +28,7 @@ public class StudentService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if(!user.getRole().equalsIgnoreCase("STUDENT")){
+        if(user.getRole()!=Role.STUDENT){
             throw new IllegalArgumentException("Only STUDENT users can create student profiles");
         }
 

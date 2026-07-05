@@ -1,6 +1,8 @@
 package com.careerBridge.careerBridge.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name="users")
@@ -12,21 +14,17 @@ public class User {
 
     private String email;
     private String password;
-    private String role;
 
-    @OneToOne
-    @JoinColumn(name="student_id")
-    private Student student;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    @OneToOne
-    @JoinColumn(name="company_id")
-    private Company company;
+
 
     public User(){
 
     }
 
-    public User(String email, String password, String role){
+    public User(String email, String password, Role role){
         this.email = email;
         this.password = password;
         this.role = role;
@@ -56,11 +54,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

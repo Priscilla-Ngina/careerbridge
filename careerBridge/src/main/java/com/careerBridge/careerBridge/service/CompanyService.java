@@ -1,7 +1,7 @@
 package com.careerBridge.careerBridge.service;
 
 import com.careerBridge.careerBridge.entity.Company;
-import com.careerBridge.careerBridge.entity.Student;
+import com.careerBridge.careerBridge.entity.Role;
 import com.careerBridge.careerBridge.entity.User;
 import com.careerBridge.careerBridge.repository.CompanyRepository;
 import com.careerBridge.careerBridge.dto.CompanyRequest;
@@ -28,7 +28,7 @@ public Company saveCompany(CompanyRequest request){
     User user = userRepository.findById(request.getUserId())
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    if(!user.getRole().equalsIgnoreCase("COMPANY")){
+    if(user.getRole() !=Role.COMPANY){
         throw new IllegalArgumentException("Only COMPANY users can create company profiles");
     }
 

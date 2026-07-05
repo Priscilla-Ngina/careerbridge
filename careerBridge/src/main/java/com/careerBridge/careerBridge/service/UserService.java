@@ -1,5 +1,6 @@
 package com.careerBridge.careerBridge.service;
 
+import com.careerBridge.careerBridge.entity.Role;
 import com.careerBridge.careerBridge.entity.User;
 import com.careerBridge.careerBridge.repository.UserRepository;
 import com.careerBridge.careerBridge.dto.RegistrationRequest;
@@ -23,6 +24,10 @@ public class UserService {
     public User register(RegistrationRequest request){
 
         User user =new User();
+
+        if(request.getRole() == Role.ADMIN){
+            throw new IllegalArgumentException("Users cannot register as ADMIN");
+        }
 
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
