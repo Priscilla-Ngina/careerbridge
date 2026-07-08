@@ -1,12 +1,11 @@
 package com.careerBridge.careerBridge.controller;
 
 
-import com.careerBridge.careerBridge.entity.Company;
 import com.careerBridge.careerBridge.entity.Internship;
 import com.careerBridge.careerBridge.service.InternshipService;
 import com.careerBridge.careerBridge.dto.InternshipRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,8 +14,12 @@ import java.util.List;
 @RequestMapping("/internships")
 public class InternshipController {
 
-    @Autowired
-    private InternshipService internshipService;
+
+    private final InternshipService internshipService;
+
+    public InternshipController(InternshipService internshipService) {
+        this.internshipService = internshipService;
+    }
 
     @PostMapping
     public Internship addInternship(@Valid @RequestBody InternshipRequest request){

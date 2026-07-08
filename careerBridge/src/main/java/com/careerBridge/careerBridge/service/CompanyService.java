@@ -7,6 +7,8 @@ import com.careerBridge.careerBridge.repository.CompanyRepository;
 import com.careerBridge.careerBridge.dto.CompanyRequest;
 import com.careerBridge.careerBridge.exception.ResourceNotFoundException;
 import com.careerBridge.careerBridge.repository.UserRepository;
+import com.careerBridge.careerBridge.security.SecurityService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -15,12 +17,14 @@ import java.time.LocalDateTime;
 @Service
 public class CompanyService {
     @Autowired
-    private CompanyRepository companyRepository;
-    private UserRepository userRepository;
+    private final CompanyRepository companyRepository;
+    private final UserRepository userRepository;
+    private final SecurityService securityService;
 
-    public CompanyService(CompanyRepository companyRepository, UserRepository userRepository){
+    public CompanyService(CompanyRepository companyRepository, UserRepository userRepository, SecurityService securityService) {
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
+        this.securityService = securityService;
     }
 
 public Company saveCompany(CompanyRequest request){
@@ -39,7 +43,7 @@ public Company saveCompany(CompanyRequest request){
     Company company = new Company();
 
     company.setUser(user);
-    company.setCompanyName(request.getCompanyName());
+company.setCompanyName(request.getCompanyName());
     company.setEmail(request.getEmail());
     company.setPhoneNumber(request.getPhoneNumber());
     company.setLocation(request.getLocation());
@@ -62,9 +66,12 @@ public Company getCompanyById(Long id){
 }
 
 public Company updateCompany(Long id, Company newCompany){
-Company existing= getCompanyById(id);
+Company existing=companyRepository.findById(id).orElseThrow(()->
+        new ResourceNotFoundException("Company Not Found"));
 
-    existing.setCompanyName(newCompany.getCompanyName());
+verifyOwnership(existing);
+
+existing.setCompanyName(newCompany.getCompanyName());
     existing.setEmail(newCompany.getEmail());
     existing.setPhoneNumber(newCompany.getPhoneNumber());
     existing.setLocation(newCompany.getLocation());
@@ -77,6 +84,20 @@ Company existing= getCompanyById(id);
 public void deleteCompany(Long id){
     Company company=companyRepository.findById(id).orElseThrow(()->
             new ResourceNotFoundException("Company Not Found"));
-    companyRepository.deleteById(id);
+    verifyOwnership(company);
+    companyRepository.delete(company);
 }
+
+private void verifyOwnership(Company company){
+        User currentUser=securityService.getCurrentUser();
+
+        if(currentUser.getRole()==Role.ADMIN){
+            return;
+        }
+
+        if(!currentUser.getId().equals(company.getUser().getId())){
+            throw new AccessDeniedException("You do not have permission to access this company profile");
+        }
+}
+
 }

@@ -1,6 +1,6 @@
 package com.careerBridge.careerBridge.dto;
 
-import jakarta.persistence.Column;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +22,7 @@ public class InternshipRequest {
     @NotBlank(message="Location is required")
     private String location;
 
-    @NotBlank(message="Company name is required")
-    private String companyName;
+
 
     @NotBlank(message="Internship type is required")
     private String type;
@@ -76,13 +75,6 @@ public class InternshipRequest {
         this.location=location;
     }
 
-    public String getCompanyName(){
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName){
-        this.companyName=companyName;
-    }
 
     public String getType(){
         return type;

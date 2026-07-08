@@ -6,7 +6,6 @@ import com.careerBridge.careerBridge.dto.ApplicationRequest;
 
 import com.careerBridge.careerBridge.service.ApplicationService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +13,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/applications")
 public class ApplicationController {
-    @Autowired
-    private ApplicationService applicationService;
+
+    private final ApplicationService applicationService;
+
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
 
     @PostMapping
     public Application addApplication(@Valid @RequestBody ApplicationRequest request) {
@@ -27,9 +30,15 @@ public class ApplicationController {
         return applicationService.getAllApplications();
     }
 
-    @GetMapping("/{id}")
-    public Application getApplicationById(@PathVariable Long id) {
-        return applicationService.getApplicationById(id);
+
+    @GetMapping("/my")
+    public List<Application> getMyApplications() {
+        return applicationService.getMyApplications();
+    }
+
+    @GetMapping("/company")
+    public List<Application> getApplicationsForMyInternships() {
+        return applicationService.getApplicationsForMyInternships();
     }
 
     @PutMapping("/{id}")

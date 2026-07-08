@@ -14,8 +14,6 @@ public class ApplicationRequest {
   @NotBlank(message="Cv file path is required")
     private String cvFilePath;
 
-  @NotNull(message="Student id is required")
-    private Long studentId;
 
   @NotNull(message="Internship id is required")
     private Long internshipId;
@@ -30,8 +28,6 @@ public class ApplicationRequest {
     public String getCvFilePath() { return cvFilePath; }
     public void setCvFilePath(String cvFilePath) { this.cvFilePath = cvFilePath; }
 
-    public Long getStudentId() { return studentId; }
-    public void setStudentId(Long studentId) { this.studentId = studentId; }
 
     public Long getInternshipId() { return internshipId; }
     public void setInternshipId(Long internshipId) { this.internshipId = internshipId; }

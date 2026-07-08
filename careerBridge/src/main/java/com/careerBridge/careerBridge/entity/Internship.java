@@ -20,7 +20,6 @@ public class Internship {
     private String description;
     private String requirements;
     private String location;
-    private String companyName;
     private String type;
     private int durationInMonths;
     private double stipend;
@@ -28,25 +27,31 @@ public class Internship {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @JsonIgnore
     @OneToMany(mappedBy = "internship")
     private List<Application> applications;
 
     public Internship(){}
 
-    public Internship(LocalDateTime createdAt, String title, String description, String requirements, String location, String companyName, String type, int durationInMonths, double stipend, LocalDate applicationDeadline, LocalDate startDate, LocalDate endDate) {
+    public Internship(LocalDateTime createdAt, String title, String description, String requirements, String location, String type, int durationInMonths, double stipend, LocalDate applicationDeadline, LocalDate startDate, LocalDate endDate, Company company) {
         this.createdAt = createdAt;
         this.title = title;
         this.description = description;
         this.requirements = requirements;
         this.location = location;
-        this.companyName = companyName;
         this.type = type;
         this.durationInMonths = durationInMonths;
         this.stipend = stipend;
         this.applicationDeadline = applicationDeadline;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.company=company;
+
+
     }
 
     public Long getId(){
@@ -97,13 +102,7 @@ public class Internship {
         this.location=location;
     }
 
-    public String getCompanyName(){
-        return companyName;
-    }
 
-    public void setCompanyName(String companyName){
-        this.companyName=companyName;
-    }
 
     public String getType(){
         return type;
@@ -151,5 +150,13 @@ public class Internship {
 
     public void setEndDate(LocalDate endDate){
         this.endDate=endDate;
+    }
+
+    public Company getCompany(){
+        return company;
+    }
+
+    public void setCompany(Company company){
+        this.company=company;
     }
 }

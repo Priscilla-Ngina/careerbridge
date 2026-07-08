@@ -8,19 +8,24 @@ import com.careerBridge.careerBridge.repository.UserRepository;
 import com.careerBridge.careerBridge.dto.StudentRequest;
 import org.springframework.stereotype.Service;
 import com.careerBridge.careerBridge.exception.ResourceNotFoundException;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinColumn;
+import com.careerBridge.careerBridge.security.SecurityService;
+import org.springframework.security.access.AccessDeniedException;
+
 import java.util.List;
 import java.time.LocalDateTime;
 
+
+
 @Service
 public class StudentService {
-    private StudentRepository studentRepository;
-    private UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final  UserRepository userRepository;
+    private final SecurityService securityService;
 
-    public StudentService(StudentRepository studentRepository, UserRepository userRepository) {
+    public StudentService(StudentRepository studentRepository, UserRepository userRepository, SecurityService securityService) {
         this.studentRepository=studentRepository;
         this.userRepository=userRepository;
+        this.securityService=securityService;
     }
 
     public Student saveStudent(StudentRequest request){
@@ -34,6 +39,10 @@ public class StudentService {
 
         if(studentRepository.existsByUserId(user.getId())){
             throw new IllegalArgumentException("This user already has a student profile");
+        }
+
+        if (!securityService.getCurrentUserId().equals(request.getUserId())) {
+            throw new AccessDeniedException("You are not authorized to create a student profile for another user.");
         }
 
         Student student = new Student();
@@ -63,6 +72,8 @@ public class StudentService {
         Student existing = studentRepository.findById(id).orElseThrow(()->
                 new ResourceNotFoundException("Student not found"));
 
+        verifyOwnership(existing);
+
         existing.setName(newStudent.getName());
         existing.setCourse(newStudent.getCourse());
         existing.setYearOfStudy(newStudent.getYearOfStudy());
@@ -76,6 +87,24 @@ public class StudentService {
     public void deleteStudent(Long id){
         Student student=studentRepository.findById(id).orElseThrow(()->
                 new ResourceNotFoundException("Student not found"));
+        verifyOwnership(student);
+
         studentRepository.delete(student);
     }
+
+    private void verifyOwnership(Student student) {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if(currentUser.getRole()==Role.ADMIN){
+            return;
+        }
+
+        if(!currentUser.getId().equals(student.getUser().getId())){
+            throw new AccessDeniedException("You do not have permission to access this student profile."
+            );
+        }
+
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.careerBridge.careerBridge.service;
 
 import com.careerBridge.careerBridge.entity.Student;
+import com.careerBridge.careerBridge.entity.User;
+import com.careerBridge.careerBridge.entity.Role;
 import com.careerBridge.careerBridge.entity.Internship;
 import com.careerBridge.careerBridge.dto.ApplicationRequest;
 import com.careerBridge.careerBridge.exception.ResourceNotFoundException;
@@ -10,7 +12,8 @@ import com.careerBridge.careerBridge.repository.InternshipRepository;
 
 import com.careerBridge.careerBridge.entity.Application;
 import com.careerBridge.careerBridge.repository.ApplicationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.careerBridge.careerBridge.security.SecurityService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -19,19 +22,31 @@ import java.time.LocalDate;
 @Service
 public class ApplicationService {
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
+    private final ApplicationRepository applicationRepository;
+    private final StudentRepository studentRepository;
+    private final InternshipRepository internshipRepository;
+    private final SecurityService securityService;
 
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private InternshipRepository internshipRepository;
+    public ApplicationService(ApplicationRepository applicationRepository, StudentRepository studentRepository, InternshipRepository internshipRepository, SecurityService securityService) {
+        this.applicationRepository = applicationRepository;
+        this.studentRepository = studentRepository;
+        this.internshipRepository = internshipRepository;
+        this.securityService = securityService;
+    }
 
     public Application saveApplication(ApplicationRequest request) {
 
-        Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() != Role.STUDENT) {
+            throw new AccessDeniedException(
+                    "Only students can apply for internships."
+            );
+        }
+
+        Student student = studentRepository.findByUserId(currentUser.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student profile not found"));
 
         Internship internship = internshipRepository.findById(request.getInternshipId())
                 .orElseThrow(() -> new ResourceNotFoundException("Internship not found"));
@@ -61,6 +76,15 @@ public class ApplicationService {
     }
 
     public List<Application> getAllApplications() {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException(
+                    "Only administrators can view all applications."
+            );
+        }
+
         return applicationRepository.findAll();
     }
 
@@ -71,6 +95,8 @@ public class ApplicationService {
 
     public Application updateApplication(Long id, ApplicationRequest request) {
         Application existing = getApplicationById(id);
+
+        verifyOwnership(existing);
 
         if(!existing.getStatus().equalsIgnoreCase("Pending")){
             throw new IllegalArgumentException("You cannot update an application that has already been reviewed");
@@ -93,6 +119,8 @@ public class ApplicationService {
     public Application updateStatus(Long id, String status) {
         Application application = getApplicationById(id);
 
+        verifyCompanyOwnership(application);
+
         if(!application.getStatus().equalsIgnoreCase("Pending")){
             throw new IllegalArgumentException("This application has already been reviewed");
         }
@@ -109,6 +137,71 @@ public class ApplicationService {
     public void deleteApplicationById(Long id) {
         Application application = applicationRepository.findById(id).orElseThrow(()->
                 new ResourceNotFoundException("Application not found"));
+        verifyOwnership(application);
         applicationRepository.delete(application);
     }
+
+    public List<Application> getMyApplications() {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() != Role.STUDENT) {
+            throw new AccessDeniedException(
+                    "Only students can view their applications."
+            );
+        }
+
+        return applicationRepository.findByStudentUserId(currentUser.getId());
+    }
+
+    public List<Application> getApplicationsForMyInternships() {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() != Role.COMPANY) {
+            throw new AccessDeniedException(
+                    "Only companies can view applications for their internships."
+            );
+        }
+
+        return applicationRepository.findByInternshipCompanyUserId(currentUser.getId());
+    }
+
+
+    private void verifyOwnership(Application application) {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return;
+        }
+
+        if (!currentUser.getId().equals(application.getStudent().getUser().getId())) {
+            throw new AccessDeniedException(
+                    "You do not have permission to modify this application."
+            );
+        }
+    }
+
+    private void verifyCompanyOwnership(Application application) {
+
+        User currentUser = securityService.getCurrentUser();
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return;
+        }
+
+        if (currentUser.getRole() != Role.COMPANY) {
+            throw new AccessDeniedException(
+                    "Only the company that posted this internship can review applications."
+            );
+        }
+
+        if (!currentUser.getId().equals(application.getInternship().getCompany().getUser().getId())) {
+            throw new AccessDeniedException(
+                    "You do not have permission to review applications for this internship."
+            );
+        }
+    }
+
 }
