@@ -12,6 +12,9 @@ import com.careerBridge.careerBridge.entity.Company;
 import org.springframework.security.access.AccessDeniedException;
 import com.careerBridge.careerBridge.entity.User;
 import com.careerBridge.careerBridge.entity.Role;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -55,8 +58,19 @@ public class InternshipService {
         return internshipRepository.save(internship);
     }
 
-    public List<Internship> getAllInternships() {
-        return internshipRepository.findAll();
+    public Page<Internship> getAllInternships(Pageable pageable) {
+        return internshipRepository.findAll(pageable);
+    }
+
+    public List<Internship> searchInternships(String keyword) {
+        return internshipRepository
+                .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrRequirementsContainingIgnoreCaseOrLocationContainingIgnoreCaseOrTypeContainingIgnoreCase(
+                        keyword,
+                        keyword,
+                        keyword,
+                        keyword,
+                        keyword
+                );
     }
 
     public Internship getInternshipById(Long id) {

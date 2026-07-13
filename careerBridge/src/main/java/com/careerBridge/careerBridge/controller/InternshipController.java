@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/internships")
@@ -29,8 +31,13 @@ public class InternshipController {
     }
 
     @GetMapping
-    public List<Internship> getAllInternships(){
-        return internshipService.getAllInternships();
+    public Page<Internship> getAllInternships(Pageable pageable) {
+        return internshipService.getAllInternships(pageable);
+    }
+
+    @GetMapping("/search")
+    public List<Internship> searchInternships(@RequestParam String keyword) {
+        return internshipService.searchInternships(keyword);
     }
 
     @GetMapping("/{id}")
