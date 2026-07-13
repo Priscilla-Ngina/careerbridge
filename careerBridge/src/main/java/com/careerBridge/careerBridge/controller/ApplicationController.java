@@ -2,12 +2,13 @@ package com.careerBridge.careerBridge.controller;
 
 import com.careerBridge.careerBridge.entity.Application;
 
-import com.careerBridge.careerBridge.dto.ApplicationRequest;
+import com.careerBridge.careerBridge.dto.ApplicationCreateRequest;
+import com.careerBridge.careerBridge.dto.ApplicationUpdateRequest;
 
 import com.careerBridge.careerBridge.service.ApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @RestController
@@ -20,8 +21,8 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @PostMapping
-    public Application addApplication(@Valid @RequestBody ApplicationRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Application addApplication(@Valid @ModelAttribute ApplicationCreateRequest request) {
         return applicationService.saveApplication(request);
     }
 
@@ -41,8 +42,14 @@ public class ApplicationController {
         return applicationService.getApplicationsForMyInternships();
     }
 
-    @PutMapping("/{id}")
-    public Application updateApplication(@PathVariable Long id, @RequestBody ApplicationRequest request) {
+    @PutMapping(
+            value = "/{id}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Application updateApplication(
+            @PathVariable Long id,
+            @Valid @ModelAttribute ApplicationUpdateRequest request) {
+
         return applicationService.updateApplication(id, request);
     }
 

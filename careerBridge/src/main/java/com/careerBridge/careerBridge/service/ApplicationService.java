@@ -4,7 +4,8 @@ import com.careerBridge.careerBridge.entity.Student;
 import com.careerBridge.careerBridge.entity.User;
 import com.careerBridge.careerBridge.entity.Role;
 import com.careerBridge.careerBridge.entity.Internship;
-import com.careerBridge.careerBridge.dto.ApplicationRequest;
+import com.careerBridge.careerBridge.dto.ApplicationCreateRequest;
+import com.careerBridge.careerBridge.dto.ApplicationUpdateRequest;
 import com.careerBridge.careerBridge.exception.ResourceNotFoundException;
 
 import com.careerBridge.careerBridge.repository.StudentRepository;
@@ -26,15 +27,17 @@ public class ApplicationService {
     private final StudentRepository studentRepository;
     private final InternshipRepository internshipRepository;
     private final SecurityService securityService;
+    private final FileStorageService fileStorageService;
 
-    public ApplicationService(ApplicationRepository applicationRepository, StudentRepository studentRepository, InternshipRepository internshipRepository, SecurityService securityService) {
+    public ApplicationService(ApplicationRepository applicationRepository, StudentRepository studentRepository, InternshipRepository internshipRepository, SecurityService securityService, FileStorageService fileStorageService) {
         this.applicationRepository = applicationRepository;
         this.studentRepository = studentRepository;
         this.internshipRepository = internshipRepository;
         this.securityService = securityService;
+        this.fileStorageService = fileStorageService;
     }
 
-    public Application saveApplication(ApplicationRequest request) {
+    public Application saveApplication(ApplicationCreateRequest request) {
 
         User currentUser = securityService.getCurrentUser();
 
@@ -63,11 +66,14 @@ public class ApplicationService {
 
         }
 
+        String cvFileName = fileStorageService.saveFile(request.getCv());
+
         Application application = new Application();
+
         application.setCreatedAt(LocalDateTime.now());
         application.setStatus("Pending");
         application.setCoverLetter(request.getCoverLetter());
-        application.setCvFilePath(request.getCvFilePath());
+        application.setCvFilePath(cvFileName);
         application.setStudent(student);
         application.setInternship(internship);
 
@@ -93,7 +99,7 @@ public class ApplicationService {
                 new ResourceNotFoundException("Application not found"));
     }
 
-    public Application updateApplication(Long id, ApplicationRequest request) {
+    public Application updateApplication(Long id, ApplicationUpdateRequest request) {
         Application existing = getApplicationById(id);
 
         verifyOwnership(existing);
@@ -110,8 +116,14 @@ public class ApplicationService {
 
 
         existing.setCoverLetter(request.getCoverLetter());
-        existing.setCvFilePath(request.getCvFilePath());
+        if (request.getCv() != null && !request.getCv().isEmpty()) {
 
+            fileStorageService.deleteFile(existing.getCvFilePath());
+
+            String newCvFileName = fileStorageService.saveFile(request.getCv());
+
+            existing.setCvFilePath(newCvFileName);
+        }
 
         return applicationRepository.save(existing);
     }
