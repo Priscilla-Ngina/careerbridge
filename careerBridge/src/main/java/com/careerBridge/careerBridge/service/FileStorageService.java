@@ -61,5 +61,11 @@ public class FileStorageService {
         }
     }
 
+    public Path loadFile(String fileName) {
+
+        return uploadPath.resolve(fileName);
+
+    }
+
 
 }

@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import java.util.List;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
+import java.nio.file.Path;
+
 @RestController
 @RequestMapping("/applications")
 public class ApplicationController {
@@ -40,6 +47,24 @@ public class ApplicationController {
     @GetMapping("/company")
     public List<Application> getApplicationsForMyInternships() {
         return applicationService.getApplicationsForMyInternships();
+    }
+
+    @GetMapping("/{id}/cv")
+    public ResponseEntity<Resource> downloadCv(
+            @PathVariable Long id) {
+
+        Path path = applicationService.downloadCv(id);
+
+        Resource resource = new FileSystemResource(path);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + path.getFileName().toString() + "\""
+                )
+                .body(resource);
+
     }
 
     @PutMapping(

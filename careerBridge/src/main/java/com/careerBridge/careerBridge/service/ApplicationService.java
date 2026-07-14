@@ -17,6 +17,7 @@ import com.careerBridge.careerBridge.security.SecurityService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 
@@ -214,6 +215,15 @@ public class ApplicationService {
                     "You do not have permission to review applications for this internship."
             );
         }
+    }
+
+    public Path downloadCv(Long applicationId) {
+
+        Application application = getApplicationById(applicationId);
+
+        verifyCompanyOwnership(application);
+
+        return fileStorageService.loadFile(application.getCvFilePath());
     }
 
 }
